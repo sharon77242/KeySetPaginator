@@ -167,7 +167,7 @@ namespace KeySetPaginator
                 response = await searchAction(request, keySetPagingRequest);
                 if (response.Count != 0)
                     afterSearchResponse = await AfterSearchAction(response);
-
+                
                 keySetPagingRequest.KeySetToken = firstToken.LastReponseToToken(response.LastOrDefault());
 
                 result.AddRange(response);

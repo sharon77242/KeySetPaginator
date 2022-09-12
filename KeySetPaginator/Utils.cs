@@ -27,10 +27,7 @@ namespace KeySetPaginator
         public static readonly MethodInfo StringSmallerThanMethod = typeof(Utils).GetMethod("SmallerThan", new[] { typeof(string), typeof(string) });
         public static readonly MethodInfo StringEqualThanMethod = typeof(Utils).GetMethod("Equal", new[] { typeof(string), typeof(string) });
 
-        public static bool IsNullableType(Type t)
-        {
-            return t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>);
-        }
+        public static bool IsNullableType(Type t) => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>);
 
 
         public static Expression<Func<QueryType, object>> FieldGetterFromProperty<QueryType>(Type type, PropertyInfo prop)
