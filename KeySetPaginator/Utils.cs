@@ -54,9 +54,12 @@ namespace KeySetPaginator
             return property;
         }
 
-        public static UnaryExpression GetKeySetTokenValueExpression<KeySetTokenType>(KeySetTokenType keySetToken, string keySetField, PropertyInfo keySetProp)
+        public static (UnaryExpression unaryExpression, bool valueNull) GetKeySetTokenValueExpression<KeySetTokenType>(KeySetTokenType keySetToken, string keySetField, PropertyInfo keySetProp)
         {
             var value = keySetProp.GetValue(keySetToken, null);
+
+            if (value == null)
+                return (Expression.Convert(Expression.Constant(value), typeof(object)), true);
 
             var type = value.GetType();
 
@@ -68,26 +71,45 @@ namespace KeySetPaginator
             }
             catch (Exception e)
             {
-                throw new ArgumentException($"Field with name { keySetField } must be from type KeySetTokenValue, and not from type { type }", e);
+                throw new ArgumentException($"Field with name {keySetField} must be from type KeySetTokenValue, and not from type {type}", e);
             }
 
             if (value == null)
-                return null;
+                return (null, true);
 
-            if (Utils.IsNullableType(value.GetType()))
+            if (IsNullableType(value.GetType()))
             {
-                throw new ArgumentException($"Token does not support nullable type for field { keySetField }");
+                throw new ArgumentException($"Token does not support nullable type for field {keySetField}");
             }
 
-            return Expression.Convert(Expression.Constant(value), value.GetType());
+            return (Expression.Convert(Expression.Constant(value), value.GetType()), false);
         }
 
-        public static List<string> GetKeySetFields<KeySetTokenType>(KeySetTokenType keySetToken, bool includeDefaultFieldsIfNeeded)
+        public static bool EmptyToken<KeySetTokenType>(this KeySetTokenType keySetToken)
             where KeySetTokenType : KeySetToken
         {
             PropertyInfo[] properties = typeof(KeySetTokenType).GetProperties();
 
-            var keySetFields = new List<string>();
+            foreach (PropertyInfo property in properties)
+            {
+                if (property.Name != "DefaultFields")
+                {
+                    // Check if field initialized in keySetToken
+                    var field = property.GetValue(keySetToken, null);
+                    if (field != null)
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static List<string> GetKeySetFields<KeySetTokenType>(this KeySetTokenType keySetToken)
+            where KeySetTokenType : KeySetToken
+        {
+            PropertyInfo[] properties = typeof(KeySetTokenType).GetProperties();
+
+            var keySetFields = new HashSet<string>();
             var defaultFields = new List<string>();
 
             foreach (PropertyInfo property in properties)
@@ -103,12 +125,9 @@ namespace KeySetPaginator
                     defaultFields = (List<string>)property.GetValue(keySetToken, null);
             }
 
-            if (!keySetFields.Any() && includeDefaultFieldsIfNeeded)
-            {
-                return defaultFields;
-            }
+            keySetFields.UnionWith(defaultFields);
 
-            return keySetFields;
+            return keySetFields.ToList();
         }
     }
 }

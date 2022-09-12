@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -32,9 +33,10 @@ namespace KeySetPaginator.Queryable
         SortDirectionDTO sortDirection)
         where KeySetTokenType : KeySetToken
         {
-            List<string> keySetFields = Utils.GetKeySetFields(keySetToken, false);
-            if (keySetFields.Count == 0)
+            if (keySetToken.EmptyToken())
                 return query;
+
+            List<string> keySetFields = Utils.GetKeySetFields(keySetToken);
 
             Type keySetType = typeof(KeySetTokenType);
             Type queryType = typeof(QueryType);
@@ -52,11 +54,11 @@ namespace KeySetPaginator.Queryable
                     throw new ArgumentException($"There is no such field {keySetFieldName}");
 
                 // This is a expression represnts the current keyset initalize field from the request
-                UnaryExpression valueExpression = Utils.GetKeySetTokenValueExpression(keySetToken, keySetFieldName, keySetProp);
+                (UnaryExpression valueExpression, bool valueNull) = Utils.GetKeySetTokenValueExpression(keySetToken, keySetFieldName, keySetProp);
 
                 // This is a expression represents the current member from queryble according to keySet current field name
                 MemberExpression property = Utils.GetPropertyMemberExpression(queryType, parameter, keySetFieldName);
-                BinaryExpression equalExpression;
+                BinaryExpression equalExpression = null;
 
                 // string has customized GreaterThan, SmallerThan, Equal methods above
                 if (typeof(KeySetTokenValue<string>).IsAssignableFrom(keySetProp.PropertyType))
@@ -81,17 +83,7 @@ namespace KeySetPaginator.Queryable
                     BinaryExpression greaterOrSmallerExpressionBinary;
                     if (Utils.IsNullableType(property.Type))
                     {
-                        var nullCheck = Expression.NotEqual(property, Expression.Constant(null, ((PropertyInfo)property.Member).PropertyType));
-
-                        PropertyInfo valueProp = ((PropertyInfo)property.Member).PropertyType.GetProperty("Value");
-
-                        // Get value of nullable for property
-                        property = Expression.Property(property, valueProp);
-
-                        greaterOrSmallerExpressionBinary = Expression.AndAlso(nullCheck,
-                                sortDirection == SortDirectionDTO.asc ?
-                                    Expression.GreaterThan(property, valueExpression) :
-                                    Expression.LessThan(property, valueExpression));
+                        NullableSkip(sortDirection, previousEqualExpression, ref expressions, parameter, valueExpression, valueNull, ref property, ref equalExpression, out greaterOrSmallerExpressionBinary);
                     }
                     else
                     {
@@ -99,21 +91,24 @@ namespace KeySetPaginator.Queryable
                         greaterOrSmallerExpressionBinary = sortDirection == SortDirectionDTO.asc ?
                             Expression.GreaterThan(property, valueExpression) :
                             Expression.LessThan(property, valueExpression);
+
+                        var greaterOrSmallerExpression = Expression.Lambda<Func<QueryType, bool>>(greaterOrSmallerExpressionBinary, parameter);
+
+                        var currentExpression = Expression.OrElse(expressions.Body,
+                                    Expression.AndAlso(previousEqualExpression.Body, greaterOrSmallerExpression.Body));
+
+                        // old params expression (if exists, first param will have non) || (previousParam equal to token (true if first param ) && currentParam is greater/smaller depends on sortDirection)
+                        expressions = Expression.Lambda<Func<QueryType, bool>>(currentExpression, parameter);
+
+                        equalExpression = Expression.Equal(property, valueExpression);
                     }
 
-                    var greaterOrSmallerExpression = Expression.Lambda<Func<QueryType, bool>>(greaterOrSmallerExpressionBinary, parameter);
 
-                    var currentExpression = Expression.OrElse(expressions.Body,
-                                Expression.AndAlso(previousEqualExpression.Body, greaterOrSmallerExpression.Body));
-
-                    // old params expression (if exists, first param will have non) || (previousParam equal to token (true if first param ) && currentParam is greater/smaller depends on sortDirection)
-                    expressions = Expression.Lambda<Func<QueryType, bool>>(currentExpression, parameter);
-
-                    equalExpression = Expression.Equal(property, valueExpression);
                 }
 
+                if (equalExpression != null)
                 // All previous field must be equal to DB fields, and the current one also
-                previousEqualExpression = Expression.Lambda<Func<QueryType, bool>>(Expression.AndAlso(previousEqualExpression.Body, equalExpression), parameter);
+                    previousEqualExpression = Expression.Lambda<Func<QueryType, bool>>(Expression.AndAlso(previousEqualExpression.Body, equalExpression), parameter);
             }
 
             // Example for expression: 
@@ -121,6 +116,50 @@ namespace KeySetPaginator.Queryable
             // Description: if position id is smaller its true, if not:
             // Check if Position id is equal and tax rate is smaller
             return query.Where(expressions);
+        }
+
+        private static void NullableSkip<QueryType>(
+            SortDirectionDTO sortDirection,
+            Expression<Func<QueryType, bool>> previousEqualExpression,
+            ref Expression<Func<QueryType, bool>> expressions,
+            ParameterExpression parameter,
+            UnaryExpression valueExpression,
+            bool valueNull,
+            ref MemberExpression property,
+            ref BinaryExpression equalExpression,
+            out BinaryExpression greaterOrSmallerExpressionBinary)
+        {
+            var nullCheck = Expression.NotEqual(property, Expression.Constant(null, ((PropertyInfo)property.Member).PropertyType));
+            PropertyInfo valueProp = ((PropertyInfo)property.Member).PropertyType.GetProperty("Value");
+
+            // Get value of nullable for property
+            property = Expression.Property(property, valueProp);
+
+            Expression<Func<QueryType, bool>> greaterOrSmallerExpression;
+
+            if (valueNull) // field on token is null, we should only check if its not null on the query
+            {
+                greaterOrSmallerExpression = Expression.Lambda<Func<QueryType, bool>>(nullCheck, parameter);
+
+                greaterOrSmallerExpressionBinary = null;
+            }
+            else
+            {
+                greaterOrSmallerExpressionBinary = Expression.AndAlso(nullCheck,
+                    sortDirection == SortDirectionDTO.asc ?
+                        Expression.GreaterThan(property, valueExpression) :
+                        Expression.LessThan(property, valueExpression));
+
+                greaterOrSmallerExpression = Expression.Lambda<Func<QueryType, bool>>(greaterOrSmallerExpressionBinary, parameter);
+
+                equalExpression = Expression.Equal(property, valueExpression);
+            }
+
+            var currentExpression = Expression.OrElse(expressions.Body,
+                        Expression.AndAlso(previousEqualExpression.Body, greaterOrSmallerExpression.Body));
+
+            // old params expression (if exists, first param will have non) || (previousParam equal to token (true if first param ) && currentParam is greater/smaller depends on sortDirection)
+            expressions = Expression.Lambda<Func<QueryType, bool>>(currentExpression, parameter);
         }
 
         /// <summary>
@@ -135,7 +174,7 @@ namespace KeySetPaginator.Queryable
         public static IQueryable<QueryType> AddSorting<QueryType, KeySetTokenType>(this IQueryable<QueryType> query, KeySetTokenType keySetToken, string sortDirection)
             where KeySetTokenType : KeySetToken
         {
-            List<string> keySetFields = Utils.GetKeySetFields(keySetToken, true);
+            List<string> keySetFields = Utils.GetKeySetFields(keySetToken);
 
             return query.AddSorting(sortDirection, keySetFields);
         }

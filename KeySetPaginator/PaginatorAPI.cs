@@ -27,7 +27,7 @@ namespace KeySetPaginator
             if (lastRow == null)
                 return null;
 
-            var keySetFields = Utils.GetKeySetFields(firstToken, true);
+            var keySetFields = Utils.GetKeySetFields(firstToken);
             Type keySetType = typeof(KeySetTokenType);
             Type rowType = typeof(RowType);
             KeySetTokenType keySet = (KeySetTokenType)Activator.CreateInstance(keySetType);

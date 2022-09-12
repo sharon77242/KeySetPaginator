@@ -10,6 +10,7 @@ namespace KeySetPaginator.Tests
             var rows = new List<ExampleModel>
             {
                 new ExampleModel() { StringName = "sharon2", DecimalName = 1, IntName = int.MaxValue, LongName = 2, NullableName = null },
+                new ExampleModel() { StringName = "sharon2", DecimalName = 1, IntName = 2, LongName = 2, NullableName = 1 },
                 new ExampleModel() { StringName = "sharon3", DecimalName = 3, IntName = 3, LongName = 3, NullableName = null }
             };
 
@@ -36,9 +37,9 @@ namespace KeySetPaginator.Tests
             response.Should().BeEquivalentTo(new List<ExampleModel> {
                                 new ExampleModel() { StringName = "sharon1", DecimalName = 1, IntName = 1, LongName = 1, NullableName = 1 },
                                 new ExampleModel() { StringName = "sharon2", DecimalName = 1, IntName = int.MaxValue, LongName = 2, NullableName = null },
+                                new ExampleModel() { StringName = "sharon2", DecimalName = 1, IntName = 2, LongName = 2, NullableName = 1 },
                                 new ExampleModel() { StringName = "sharon2", DecimalName = 2, IntName = 2, LongName = 2, NullableName = 2 },
-                                new ExampleModel() { StringName = "sharon3", DecimalName = 3, IntName = 3, LongName = 3, NullableName = null },
-                                new ExampleModel() { StringName = "sharon3", DecimalName = 3, IntName = 3, LongName = 3, NullableName = 3 },
+                                new ExampleModel() { StringName = "sharon3", DecimalName = 3, IntName = 3, LongName = 3, NullableName = null }
             });
         }
 
@@ -71,13 +72,14 @@ namespace KeySetPaginator.Tests
 
             Rows = Rows.KeySetSkip(token, SortDirectionDTO.asc);
 
-            Rows = Rows.Take(5);
+            Rows = Rows.Take(6);
 
             var response = Rows.ToList();
 
             response.Should().BeEquivalentTo(new List<ExampleModel> {
                                 new ExampleModel() { StringName = "sharon1", DecimalName = 1, IntName = 1, LongName = 1, NullableName = 1 },
                                 new ExampleModel() { StringName = "sharon2", DecimalName = 1, IntName = int.MaxValue, LongName = 2, NullableName = null },
+                                new ExampleModel() { StringName = "sharon2", DecimalName = 1, IntName = 2, LongName = 2, NullableName = 1 },
                                 new ExampleModel() { StringName = "sharon2", DecimalName = 2, IntName = 2, LongName = 2, NullableName = 2 },
                                 new ExampleModel() { StringName = "sharon3", DecimalName = 3, IntName = 3, LongName = 3, NullableName = null },
                                 new ExampleModel() { StringName = "sharon3", DecimalName = 3, IntName = 3, LongName = 3, NullableName = 3 },
@@ -138,5 +140,75 @@ namespace KeySetPaginator.Tests
                                                 new ExampleModel() { StringName = "sharon4", DecimalName = 4, IntName = 4, LongName = 4, NullableName = 4 }
             });
         }
+
+        [Test]
+        public void TestAfterRowToken_SkippingSortingFirstRowsSameComplexKey()
+        {
+            ExampleToken token = new() { StringName = KeySetToken.InitField("sharon2"), NullableName = KeySetToken.InitField(1M) };
+            Rows = Rows.AddSorting(token, SortDirectionDTO.asc);
+
+            Rows = Rows.KeySetSkip(token, SortDirectionDTO.asc);
+
+            Rows = Rows.Take(1);
+
+            var response = Rows.ToList();
+
+            response.Should().BeEquivalentTo(new List<ExampleModel> {
+                                                new ExampleModel() { StringName = "sharon2", DecimalName = 2, IntName = 2, LongName = 2, NullableName = 2 }
+            });
+        }
+
+        [Test]
+        public void TestAfterRowToken_SkippingSortingFirstRowsSameNullableComplexKey_GetAfterNull()
+        {
+            ExampleToken token = new() { StringName = KeySetToken.InitField("sharon2") };
+            Rows = Rows.AddSorting(token, SortDirectionDTO.asc);
+
+            Rows = Rows.KeySetSkip(token, SortDirectionDTO.asc);
+
+            Rows = Rows.Take(1);
+
+            var response = Rows.ToList();
+
+            response.Should().BeEquivalentTo(new List<ExampleModel> {
+                                                new ExampleModel() { StringName = "sharon2", DecimalName = 1, IntName = 2, LongName = 2, NullableName = 1 }
+            });
+        }
+
+        [Test]
+        public void TestAfterLastRow_SkippingSortingAscending_ShouldReturnEmpty()
+        {
+            ExampleToken token = new() { StringName = KeySetToken.InitField("sharon9"), NullableName = KeySetToken.InitField(9M) };
+            Rows = Rows.AddSorting(token, SortDirectionDTO.asc);
+
+            Rows = Rows.KeySetSkip(token, SortDirectionDTO.asc);
+
+            Rows = Rows.Take(1);
+
+            var response = Rows.ToList();
+
+            response.Should().BeEquivalentTo(new List<ExampleModel> {
+            });
+        }
+
+        [Test]
+        public void TestAfterLastRow_SkippingSortingDescending_ShouldReturnEmpty()
+        {
+            ExampleToken token = new() { StringName = KeySetToken.InitField("sharon1"), NullableName = KeySetToken.InitField(1M) };
+            Rows = Rows.AddSorting(token, SortDirectionDTO.desc);
+
+            Rows = Rows.KeySetSkip(token, SortDirectionDTO.desc);
+
+            Rows = Rows.Take(1);
+
+            var response = Rows.ToList();
+
+            response.Should().BeEquivalentTo(new List<ExampleModel>
+            {
+            });
+        }
+
+        // Add check support of nullable skipping
+        // Add check invalid cases
     }
 }
