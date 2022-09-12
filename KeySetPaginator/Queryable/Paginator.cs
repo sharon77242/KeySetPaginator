@@ -1,17 +1,20 @@
-﻿using KeySetPaginator;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Queryable.KeySetPaginator
+namespace KeySetPaginator.Queryable
 {
     /// <summary>
     /// Extension class for doing paging actions using expressions
     /// </summary>
     public static class Paginator
     {
+        //TODO: add a validation that every field in the token expect of default fields are from type KeySetTokenValue
+
+
+
         /// <summary>
         /// On a Query build key set skipping according to keySetToken and sortDirection
         /// Inside the method we build an expression that represents
