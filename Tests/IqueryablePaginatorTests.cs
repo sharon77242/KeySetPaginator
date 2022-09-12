@@ -1,8 +1,6 @@
-using FluentAssertions;
-
 namespace KeySetPaginator.Tests
 {
-    public class Tests
+    public class IqueryablePaginatorTests
     {
         public IQueryable<ExampleModel> Rows { get; set; }
 
@@ -104,6 +102,40 @@ namespace KeySetPaginator.Tests
                                 new ExampleModel() { StringName = "sharon8", DecimalName = 8, IntName = 8, LongName = 8, NullableName = 8 },
                                 new ExampleModel() { StringName = "sharon7", DecimalName = 7, IntName = 7, LongName = 7, NullableName = 7 },
                                 new ExampleModel() { StringName = "sharon6", DecimalName = 6, IntName = 6, LongName = 6, NullableName = 6 },
+            });
+        }
+
+        [Test]
+        public void TestAfterRowToken_SkippingSortingFirstRows()
+        {
+            ExampleToken token = new() { StringName = KeySetToken.InitField("sharon5"), NullableName = KeySetToken.InitField(5M) };
+            Rows = Rows.AddSorting(token, SortDirectionDTO.asc);
+
+            Rows = Rows.KeySetSkip(token, SortDirectionDTO.asc);
+
+            Rows = Rows.Take(1);
+
+            var response = Rows.ToList();
+
+            response.Should().BeEquivalentTo(new List<ExampleModel> {
+                                                new ExampleModel() { StringName = "sharon6", DecimalName = 6, IntName = 6, LongName = 6, NullableName = 6 }
+            });
+        }
+
+        [Test]
+        public void TestAfterRowToken_SkippingSortingLastRows()
+        {
+            ExampleToken token = new() { StringName = KeySetToken.InitField("sharon5"), NullableName = KeySetToken.InitField(5M) };
+            Rows = Rows.AddSorting(token, SortDirectionDTO.desc);
+
+            Rows = Rows.KeySetSkip(token, SortDirectionDTO.desc);
+
+            Rows = Rows.Take(1);
+
+            var response = Rows.ToList();
+
+            response.Should().BeEquivalentTo(new List<ExampleModel> {
+                                                new ExampleModel() { StringName = "sharon4", DecimalName = 4, IntName = 4, LongName = 4, NullableName = 4 }
             });
         }
     }
