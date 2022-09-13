@@ -4,7 +4,36 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>KeySetPaginator</Title>
+    <Authors>$(AssemblyName) Sharon Alhazov</Authors>
+    <Description>An easy Key Set (cursor)  pagination</Description>
+    <PackageProjectUrl>https://github.com/sharon77242/KeySetPaginator</PackageProjectUrl>
+    <PackageIcon>189951522-0bd23515-468d-4ccc-9fa5-3bcb2475c542.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/sharon77242/KeySetPaginator</RepositoryUrl>
+    <PackageTags>Pagination CursorPagination KeySetPagination .NetCore</PackageTags>
+    <PackageReleaseNotes>Add the complete support for key set pagination</PackageReleaseNotes>
+    <PackAsTool>False</PackAsTool>
+    <IncludeSymbols>False</IncludeSymbols>
+    <PackageLicenseFile>License.txt</PackageLicenseFile>
+    <Version>$(VersionPrefix) 1.0.1</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\License.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="C:\Users\Sharon Elhazov\Desktop\189951522-0bd23515-468d-4ccc-9fa5-3bcb2475c542.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
