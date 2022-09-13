@@ -26,7 +26,7 @@ namespace KeySetPaginator
             var keySetFields = Utils.GetKeySetFields(firstToken);
             Type keySetType = typeof(KeySetTokenType);
             Type rowType = typeof(RowType);
-            KeySetTokenType keySet = (KeySetTokenType)Activator.CreateInstance(keySetType);
+            KeySetTokenType keySet = Activator.CreateInstance(keySetType) as KeySetTokenType;
 
             foreach (var keySetFieldName in keySetFields)
             {
@@ -55,7 +55,7 @@ namespace KeySetPaginator
             if (Utils.IsNullableType(rowValue.GetType()))
             {
                 rowProp = rowType.GetProperty(keySetFieldName);
-                rowValue = (PropertyInfo)rowProp.GetValue("Value");
+                rowValue = rowProp.GetValue("Value") as PropertyInfo;
             }
         }
 
