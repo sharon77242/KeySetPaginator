@@ -75,7 +75,7 @@ namespace KeySetPaginator
         /// <param name="request"></param>
         /// <param name="keySetPagingRequest"></param>
         public static async Task<List<ReturnType>> GetAllResults<RequestType, KeySetTokenType, ReturnType>(
-            Func<RequestType, KeySetPagingRequest<KeySetTokenType>, Task<List<ReturnType>>> searchAction,
+            this Func<RequestType, KeySetPagingRequest<KeySetTokenType>, Task<List<ReturnType>>> searchAction,
             RequestType request,
             KeySetPagingRequest<KeySetTokenType> keySetPagingRequest)
                 where KeySetTokenType : KeySetToken, new()

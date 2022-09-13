@@ -219,20 +219,22 @@ namespace KeySetPaginator.Tests
         public void TestBadDefinedToken_NotExistingField_ShouldThrow()
         {
             WrongNameToken token = new();
-            Assert.Throws<ArgumentException>(() => Rows.AddSorting(token, SortDirectionDTO.desc), $"There is no such field NotKeySetTokenValue");
+            var ex = Assert.Throws<ArgumentException>(() => Rows.AddSorting(token, SortDirectionDTO.desc));
+            Assert.That(ex.Message, Is.EqualTo($"There is no such field NotKeySetTokenValue"));
 
             // Sorting covers the validation here
-           //Assert.Throws<ArgumentException>(() => Rows.KeySetSkip(token, SortDirectionDTO.desc), $"There is no such field NotKeySetTokenValue");
-
+            //Assert.Throws<ArgumentException>(() => Rows.KeySetSkip(token, SortDirectionDTO.desc), $"There is no such field NotKeySetTokenValue");
         }
 
         [Test]
         public void TestBadDefinedToken_NotExistingFieldInit_ShouldThrow()
         {
             WrongNameToken token = new() { NotKeySetTokenValue = new(1) };
-            Assert.Throws<ArgumentException>(() => Rows.AddSorting(token, SortDirectionDTO.desc), $"There is no such field NotKeySetTokenValue");
+            var ex = Assert.Throws<ArgumentException>(() => Rows.AddSorting(token, SortDirectionDTO.desc));
+            Assert.That(ex.Message, Is.EqualTo($"There is no such field NotKeySetTokenValue"));
 
-            Assert.Throws<ArgumentException>(() => Rows.KeySetSkip(token, SortDirectionDTO.desc), $"There is no such field NotKeySetTokenValue");
+            Assert.Throws<ArgumentException>(() => Rows.KeySetSkip(token, SortDirectionDTO.desc));
+            Assert.That(ex.Message, Is.EqualTo($"There is no such field NotKeySetTokenValue"));
         }
 
         public class NoTokenValueFieldToken : KeySetToken
@@ -248,13 +250,15 @@ namespace KeySetPaginator.Tests
         [Test]
         public void TestBadDefinedToken_NoTokenValueField_ShouldThrow()
         {
-            Assert.Throws<ArgumentException>(() => new NoTokenValueFieldToken(), "$Property of type: NotKeySetTokenValue must be of type KeySetTokenValue");
+            var ex = Assert.Throws<ArgumentException>(() => new NoTokenValueFieldToken());
+            Assert.That(ex.Message, Is.EqualTo("Property of type: NotKeySetTokenValue must be of type KeySetTokenValue"));
         }
 
         [Test]
         public void TestBadDefinedToken_NoTokenValueFieldInit_ShouldThrow()
         {
-            Assert.Throws<ArgumentException>(() => new NoTokenValueFieldToken() { NotKeySetTokenValue = 1 }, "$Property of type: NotKeySetTokenValue must be of type KeySetTokenValue");
+           var ex = Assert.Throws<ArgumentException>(() => new NoTokenValueFieldToken() { NotKeySetTokenValue = 1 });
+            Assert.That(ex.Message, Is.EqualTo("Property of type: NotKeySetTokenValue must be of type KeySetTokenValue"));
         }
 
         public class NoPropertiesToken : KeySetToken
@@ -269,7 +273,8 @@ namespace KeySetPaginator.Tests
         [Test]
         public void TestBadDefinedToken_NoPropertiesToken_ShouldThrow()
         {
-            Assert.Throws<ArgumentException>(() => new NoPropertiesToken(), "$Property of type: NotKeySetTokenValue must be of type KeySetTokenValue");
+            var ex = Assert.Throws<ArgumentException>(() => new NoPropertiesToken());
+            Assert.That(ex.Message, Is.EqualTo($"Token from type {typeof(NoPropertiesToken)} must have at least one property from type KeySetTokenValue"));
         }
     }
 }
