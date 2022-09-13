@@ -12,10 +12,6 @@ namespace KeySetPaginator.Queryable
     /// </summary>
     public static class Paginator
     {
-        //TODO: add a validation that every field in the token expect of default fields are from type KeySetTokenValue
-
-
-
         /// <summary>
         /// On a Query build key set skipping according to keySetToken and sortDirection
         /// Inside the method we build an expression that represents

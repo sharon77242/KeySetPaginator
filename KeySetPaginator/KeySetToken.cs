@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Reflection;
 
 namespace KeySetPaginator
 {
@@ -13,9 +16,32 @@ namespace KeySetPaginator
     {
         [Required]
         public abstract List<string> DefaultFields { get; set; }
-        public KeySetToken (List<string> DefaultFields)
+        public KeySetToken(List<string> DefaultFields)
         {
             this.DefaultFields = DefaultFields;
+            ValidateTokenProperties();
+
+        }
+
+        protected void ValidateTokenProperties()
+        {
+            PropertyInfo[] properties = GetType().GetProperties();
+
+            bool hasAtLeastOneTokenValue = false;
+
+            foreach (PropertyInfo property in properties)
+            {
+                if (property.Name != "DefaultFields")
+                {
+                    if (!property.PropertyType.Name.Contains("KeySetTokenValue"))
+                        throw new ArgumentException($"Property of type: {property.Name} must be of type KeySetTokenValue");
+                    else
+                        hasAtLeastOneTokenValue = true;
+                }
+            }
+
+            if (!hasAtLeastOneTokenValue)
+                throw new ArgumentException($"Token from type {GetType()} must have at least one property from type KeySetTokenValue");
         }
 
         public static KeySetTokenValue<T> InitField<T>(T a)

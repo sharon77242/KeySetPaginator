@@ -187,8 +187,7 @@ namespace KeySetPaginator.Tests
 
             var response = Rows.ToList();
 
-            response.Should().BeEquivalentTo(new List<ExampleModel> {
-            });
+            response.Should().BeEquivalentTo(new List<ExampleModel> { });
         }
 
         [Test]
@@ -203,12 +202,74 @@ namespace KeySetPaginator.Tests
 
             var response = Rows.ToList();
 
-            response.Should().BeEquivalentTo(new List<ExampleModel>
-            {
-            });
+            response.Should().BeEquivalentTo(new List<ExampleModel> { });
         }
 
-        // Add check support of nullable skipping
-        // Add check invalid cases
+        public class WrongNameToken : KeySetToken
+        {
+            public WrongNameToken()
+            : base(new List<string>() { "NotKeySetTokenValue" })
+            { }
+            public KeySetTokenValue<int> NotKeySetTokenValue { get; set; }
+
+            public override List<string> DefaultFields { get; set; }
+        }
+
+        [Test]
+        public void TestBadDefinedToken_NotExistingField_ShouldThrow()
+        {
+            WrongNameToken token = new();
+            Assert.Throws<ArgumentException>(() => Rows.AddSorting(token, SortDirectionDTO.desc), $"There is no such field NotKeySetTokenValue");
+
+            // Sorting covers the validation here
+           //Assert.Throws<ArgumentException>(() => Rows.KeySetSkip(token, SortDirectionDTO.desc), $"There is no such field NotKeySetTokenValue");
+
+        }
+
+        [Test]
+        public void TestBadDefinedToken_NotExistingFieldInit_ShouldThrow()
+        {
+            WrongNameToken token = new() { NotKeySetTokenValue = new(1) };
+            Assert.Throws<ArgumentException>(() => Rows.AddSorting(token, SortDirectionDTO.desc), $"There is no such field NotKeySetTokenValue");
+
+            Assert.Throws<ArgumentException>(() => Rows.KeySetSkip(token, SortDirectionDTO.desc), $"There is no such field NotKeySetTokenValue");
+        }
+
+        public class NoTokenValueFieldToken : KeySetToken
+        {
+            public NoTokenValueFieldToken()
+            : base(new List<string>() { "NotKeySetTokenValue" })
+            { }
+            public int NotKeySetTokenValue { get; set; }
+
+            public override List<string> DefaultFields { get; set; }
+        }
+
+        [Test]
+        public void TestBadDefinedToken_NoTokenValueField_ShouldThrow()
+        {
+            Assert.Throws<ArgumentException>(() => new NoTokenValueFieldToken(), "$Property of type: NotKeySetTokenValue must be of type KeySetTokenValue");
+        }
+
+        [Test]
+        public void TestBadDefinedToken_NoTokenValueFieldInit_ShouldThrow()
+        {
+            Assert.Throws<ArgumentException>(() => new NoTokenValueFieldToken() { NotKeySetTokenValue = 1 }, "$Property of type: NotKeySetTokenValue must be of type KeySetTokenValue");
+        }
+
+        public class NoPropertiesToken : KeySetToken
+        {
+            public NoPropertiesToken()
+            : base(new List<string>() { "NotKeySetTokenValue" })
+            { }
+
+            public override List<string> DefaultFields { get; set; }
+        }
+
+        [Test]
+        public void TestBadDefinedToken_NoPropertiesToken_ShouldThrow()
+        {
+            Assert.Throws<ArgumentException>(() => new NoPropertiesToken(), "$Property of type: NotKeySetTokenValue must be of type KeySetTokenValue");
+        }
     }
 }
