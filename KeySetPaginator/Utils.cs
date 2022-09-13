@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
 
 namespace KeySetPaginator
@@ -122,7 +119,7 @@ namespace KeySetPaginator
                         keySetFields.Add(property.Name);
                 }
                 else
-                    defaultFields = (List<string>)property.GetValue(keySetToken, null);
+                    defaultFields = property.GetValue(keySetToken, null) as List<string>;
             }
 
             keySetFields.UnionWith(defaultFields);
