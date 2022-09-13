@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -18,8 +18,8 @@
     <PackageReference Include="coverlet.collector" Version="3.1.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\KeySetPaginator\KeySetPaginator.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\KeySetPaginator\KeySetPaginator.csproj" />
+	</ItemGroup>
 
 </Project>

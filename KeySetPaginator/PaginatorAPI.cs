@@ -18,7 +18,7 @@ namespace KeySetPaginator
         /// <param name="firstToken"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public static KeySetTokenType LastReponseToToken<RowType, KeySetTokenType>(this KeySetTokenType firstToken, RowType lastRow)
+        public static KeySetTokenType? LastReponseToToken<RowType, KeySetTokenType>(this KeySetTokenType firstToken, RowType lastRow)
             where KeySetTokenType : KeySetToken
         {
             if (firstToken == null)
