@@ -36,7 +36,7 @@ await PaginatorAPI.GetAllResults(
                 new KeySetPagingRequest<ExampleToken>
                 {
                     PageSize = 3,
-                    SortDirection = SortDirectionDTO.asc,
+                    SortDirection = SortDirection.asc,
                     KeySetToken = new ExampleToken() { StringName = KeySetToken.InitField("sharon2"), NullableName = KeySetToken.InitField(2M) }
                 });
 ```
@@ -56,7 +56,7 @@ await PaginatorAPI.GetAllResults(
                 new KeySetPagingRequest<ExampleToken>
                 {
                     PageSize = 1,
-                    SortDirection = SortDirectionDTO.asc,
+                    SortDirection = SortDirection.asc,
                     KeySetToken = new ExampleToken() { StringName = KeySetToken.InitField("sharon2"), NullableName = KeySetToken.InitField(3M) }
                 });
 ```
