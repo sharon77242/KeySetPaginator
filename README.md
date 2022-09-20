@@ -12,6 +12,10 @@ The extension method allows to easily **skip**, **order by**, and **get all resu
 
 ## Usage
 
+To use the library at package reference:
+    <PackageReference Include="KeySetPaginator" Version="DesiredVersion" />
+
+
 On your search action use: 
 ```cs
 KeySetPaginator.Queryable.Paginator
@@ -26,6 +30,8 @@ KeySetPaginator.Queryable.Paginator
 Query = Query.KeySetSkip(pagingRequest.KeySetToken, pagingRequest.SortDirection);
 ```
 This will use the Query (of type queryable), to skip relevant rows from KeySetToken, by SortDirection (Ascending, Descending)
+
+NOTE - in order to the sorting and skipping to work properly they need to have matching params (keySetToken, direction)
 
 ```cs
 KeySetPaginator.PaginatorAPI
