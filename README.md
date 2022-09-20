@@ -71,6 +71,26 @@ It means it will get only the first "PageSize" (1) results after the token.
 
 
 ## Data Structures
+
+```cs
+ public class ExampleToken : KeySetToken
+    {
+        public ExampleToken()
+            : base(new List<string>() { nameof(StringName), nameof(NullableName)})
+        { }
+        public ExampleToken(List<string> DefaultFields)
+            : base(DefaultFields ?? new List<string>() { nameof(StringName), nameof(NullableName) })
+        { }
+
+        public KeySetTokenValue<string> StringName { get; set; }
+        public KeySetTokenValue<decimal> DecimalName { get; set; }
+        public KeySetTokenValue<int> IntName { get; set; }
+        public KeySetTokenValue<long> LongName { get; set; }
+        public KeySetTokenValue<decimal> NullableName { get; set; }
+        public override List<string> DefaultFields { get; set; }
+    }
+```
+
 ***KeySetToken*** - A representation of the token depending on the model, defined in the relevant order.
 
 Those deriving from it can add fields (the fields must be of type KeySetTokenValue<FieldType>).
@@ -85,7 +105,7 @@ Each field defined and initialized will be sorted and skipped only if its define
 
 ***KeySetPagingRequest*** - A Paging Request options object for when using PagintorAPI.
 
-used to define the token, sort direction, page size, and timeout (if needed by the search action).
+used to define the request, the token, sort direction, page size, and timeout (if needed by the search action).
 
 ## Important Notes
 * Its imprtant to define in the keyset token a combination of the fields the is unique as explained [here](https://docs.microsoft.com/en-us/ef/core/querying/pagination)
