@@ -1,13 +1,15 @@
 ﻿
+using System.Collections.Generic;
+
 namespace KeySetPaginator.Tests
 {
     public class ExampleToken : KeySetToken
     {
         public ExampleToken()
-            : base(new List<string>() { "StringName", "NullableName" })
+            : base(new List<string>() { nameof(StringName), nameof(NullableName)})
         { }
         public ExampleToken(List<string> DefaultFields)
-            : base(DefaultFields ?? new List<string>() { "StringName", "NullableName" })
+            : base(DefaultFields ?? new List<string>() { nameof(StringName), nameof(NullableName) })
         { }
 
         public KeySetTokenValue<string> StringName { get; set; }

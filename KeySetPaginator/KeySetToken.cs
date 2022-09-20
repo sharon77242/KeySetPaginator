@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Reflection;
 
 namespace KeySetPaginator
@@ -12,12 +15,53 @@ namespace KeySetPaginator
     public abstract class KeySetToken
     {
         [Required]
+        /// This field defines the minimum unique index to sort/skip by.
+        /// If needed to Append to it use AddPriorToken method
         public abstract List<string> DefaultFields { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DefaultFields"></param>
+        /// <param name="appendToken">Decide if to force init default fields or just append to the type default fields, 
+        /// false means force init default fields, true means add to current </param>
         public KeySetToken(List<string> DefaultFields)
         {
             this.DefaultFields = DefaultFields;
-            ValidateTokenProperties();
 
+            ValidateTokenProperties();
+        }
+
+        public void AddPriorToken(List<string> tokenNames)
+        {
+            if (DefaultFields == null)
+            {
+                DefaultFields = tokenNames;
+                return;
+            }
+
+            if (tokenNames == null)
+                throw new ArgumentNullException("Token names cannot be null");
+
+            DefaultFields = tokenNames.Concat(DefaultFields).ToList();
+        }
+
+        public KeySetType AddAndGetPriorToken<KeySetType>(List<string> tokenNames)
+            where KeySetType : KeySetToken
+        {
+            AddPriorToken(tokenNames);
+            return (KeySetType)this;
+        }
+
+        public KeySetType AddAndGetPriorToken<KeySetType>(string tokenName)
+            where KeySetType : KeySetToken
+        {
+            return AddAndGetPriorToken<KeySetType>(new List<string> { tokenName });
+        }
+
+        public void AddPriorToken(string tokenName)
+        {
+            AddPriorToken(new List<string> { tokenName });
         }
 
         protected void ValidateTokenProperties()

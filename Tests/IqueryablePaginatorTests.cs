@@ -1,3 +1,10 @@
+using FluentAssertions;
+using KeySetPaginator.Queryable;
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace KeySetPaginator.Tests
 {
     public class IqueryablePaginatorTests
@@ -25,10 +32,10 @@ namespace KeySetPaginator.Tests
         [Test]
         public void TestEmptyToken_SkippingSortingFirstRows()
         {
-            ExampleToken token = new();
-            Rows = Rows.AddSorting(token, SortDirectionDTO.asc);
+            ExampleToken token = new ExampleToken();
+            Rows = Rows.AddSorting(token, SortDirection.asc);
 
-            Rows = Rows.KeySetSkip(token, SortDirectionDTO.asc);
+            Rows = Rows.KeySetSkip(token, SortDirection.asc);
 
             Rows = Rows.Take(5);
 
@@ -46,10 +53,10 @@ namespace KeySetPaginator.Tests
         [Test]
         public void TestEmptyToken_SkippingSortingLastRows()
         {
-            ExampleToken token = new();
-            Rows = Rows.AddSorting(token, SortDirectionDTO.desc);
+            ExampleToken token = new ExampleToken();
+            Rows = Rows.AddSorting(token, SortDirection.desc);
 
-            Rows = Rows.KeySetSkip(token, SortDirectionDTO.desc);
+            Rows = Rows.KeySetSkip(token, SortDirection.desc);
 
             Rows = Rows.Take(5);
 
@@ -67,10 +74,10 @@ namespace KeySetPaginator.Tests
         [Test]
         public void TestEmptyToken_SkippingSortingFirstRows_DifferentDefaultFields()
         {
-            ExampleToken token = new(new List<string> { "DecimalName", "NullableName" });
-            Rows = Rows.AddSorting(token, SortDirectionDTO.asc);
+            ExampleToken token = new ExampleToken(new List<string> { "DecimalName", "NullableName" });
+            Rows = Rows.AddSorting(token, SortDirection.asc);
 
-            Rows = Rows.KeySetSkip(token, SortDirectionDTO.asc);
+            Rows = Rows.KeySetSkip(token, SortDirection.asc);
 
             Rows = Rows.Take(6);
 
@@ -89,10 +96,10 @@ namespace KeySetPaginator.Tests
         [Test]
         public void TestEmptyToken_SkippingSortingLastRows_DifferentDefaultFields()
         {
-            ExampleToken token = new(new List<string> { "IntName", "NullableName" });
-            Rows = Rows.AddSorting(token, SortDirectionDTO.desc);
+            ExampleToken token = new ExampleToken(new List<string> { "IntName", "NullableName" });
+            Rows = Rows.AddSorting(token, SortDirection.desc);
 
-            Rows = Rows.KeySetSkip(token, SortDirectionDTO.desc);
+            Rows = Rows.KeySetSkip(token, SortDirection.desc);
 
             Rows = Rows.Take(5);
 
@@ -110,10 +117,10 @@ namespace KeySetPaginator.Tests
         [Test]
         public void TestAfterRowToken_SkippingSortingFirstRows()
         {
-            ExampleToken token = new() { StringName = KeySetToken.InitField("sharon5"), NullableName = KeySetToken.InitField(5M) };
-            Rows = Rows.AddSorting(token, SortDirectionDTO.asc);
+            ExampleToken token = new ExampleToken() { StringName = KeySetToken.InitField("sharon5"), NullableName = KeySetToken.InitField(5M) };
+            Rows = Rows.AddSorting(token, SortDirection.asc);
 
-            Rows = Rows.KeySetSkip(token, SortDirectionDTO.asc);
+            Rows = Rows.KeySetSkip(token, SortDirection.asc);
 
             Rows = Rows.Take(1);
 
@@ -127,10 +134,10 @@ namespace KeySetPaginator.Tests
         [Test]
         public void TestAfterRowToken_SkippingSortingLastRows()
         {
-            ExampleToken token = new() { StringName = KeySetToken.InitField("sharon5"), NullableName = KeySetToken.InitField(5M) };
-            Rows = Rows.AddSorting(token, SortDirectionDTO.desc);
+            ExampleToken token = new ExampleToken() { StringName = KeySetToken.InitField("sharon5"), NullableName = KeySetToken.InitField(5M) };
+            Rows = Rows.AddSorting(token, SortDirection.desc);
 
-            Rows = Rows.KeySetSkip(token, SortDirectionDTO.desc);
+            Rows = Rows.KeySetSkip(token, SortDirection.desc);
 
             Rows = Rows.Take(1);
 
@@ -144,10 +151,10 @@ namespace KeySetPaginator.Tests
         [Test]
         public void TestAfterRowToken_SkippingSortingFirstRowsSameComplexKey()
         {
-            ExampleToken token = new() { StringName = KeySetToken.InitField("sharon2"), NullableName = KeySetToken.InitField(1M) };
-            Rows = Rows.AddSorting(token, SortDirectionDTO.asc);
+            ExampleToken token = new ExampleToken() { StringName = KeySetToken.InitField("sharon2"), NullableName = KeySetToken.InitField(1M) };
+            Rows = Rows.AddSorting(token, SortDirection.asc);
 
-            Rows = Rows.KeySetSkip(token, SortDirectionDTO.asc);
+            Rows = Rows.KeySetSkip(token, SortDirection.asc);
 
             Rows = Rows.Take(1);
 
@@ -161,10 +168,10 @@ namespace KeySetPaginator.Tests
         [Test]
         public void TestAfterRowToken_SkippingSortingFirstRowsSameNullableComplexKey_GetAfterNull()
         {
-            ExampleToken token = new() { StringName = KeySetToken.InitField("sharon2") };
-            Rows = Rows.AddSorting(token, SortDirectionDTO.asc);
+            ExampleToken token = new ExampleToken() { StringName = KeySetToken.InitField("sharon2") };
+            Rows = Rows.AddSorting(token, SortDirection.asc);
 
-            Rows = Rows.KeySetSkip(token, SortDirectionDTO.asc);
+            Rows = Rows.KeySetSkip(token, SortDirection.asc);
 
             Rows = Rows.Take(1);
 
@@ -178,10 +185,10 @@ namespace KeySetPaginator.Tests
         [Test]
         public void TestAfterLastRow_SkippingSortingAscending_ShouldReturnEmpty()
         {
-            ExampleToken token = new() { StringName = KeySetToken.InitField("sharon9"), NullableName = KeySetToken.InitField(9M) };
-            Rows = Rows.AddSorting(token, SortDirectionDTO.asc);
+            ExampleToken token = new ExampleToken() { StringName = KeySetToken.InitField("sharon9"), NullableName = KeySetToken.InitField(9M) };
+            Rows = Rows.AddSorting(token, SortDirection.asc);
 
-            Rows = Rows.KeySetSkip(token, SortDirectionDTO.asc);
+            Rows = Rows.KeySetSkip(token, SortDirection.asc);
 
             Rows = Rows.Take(1);
 
@@ -193,10 +200,10 @@ namespace KeySetPaginator.Tests
         [Test]
         public void TestAfterLastRow_SkippingSortingDescending_ShouldReturnEmpty()
         {
-            ExampleToken token = new() { StringName = KeySetToken.InitField("sharon1"), NullableName = KeySetToken.InitField(1M) };
-            Rows = Rows.AddSorting(token, SortDirectionDTO.desc);
+            ExampleToken token = new ExampleToken( ) { StringName = KeySetToken.InitField("sharon1"), NullableName = KeySetToken.InitField(1M) };
+            Rows = Rows.AddSorting(token, SortDirection.desc);
 
-            Rows = Rows.KeySetSkip(token, SortDirectionDTO.desc);
+            Rows = Rows.KeySetSkip(token, SortDirection.desc);
 
             Rows = Rows.Take(1);
 
@@ -205,10 +212,27 @@ namespace KeySetPaginator.Tests
             response.Should().BeEquivalentTo(new List<ExampleModel> { });
         }
 
+        [Test (Description = "String name is not init in token even though its default to it. " +
+                             "It means that the last row was with null string field" +
+                             "So the condition will be first greater than nullable name (which is set) than by not string name not equal null")]
+        public void TestNullDefaultStringField_ShouldSortFirstByExistingTokenThanByNotEqualToNullField()
+        {
+            ExampleToken token = new ExampleToken() { NullableName = KeySetToken.InitField(1M) };
+            Rows = Rows.AddSorting(token, SortDirection.asc);
+
+            Rows = Rows.KeySetSkip(token, SortDirection.asc);
+
+            Rows = Rows.Take(1);
+
+            var response = Rows.FirstOrDefault();
+
+            response.Should().BeEquivalentTo(new ExampleModel {  StringName = "sharon1" , DecimalName = 1, IntName = 1, LongName = 1, NullableName = 1 });
+        }
+
         public class WrongNameToken : KeySetToken
         {
             public WrongNameToken()
-            : base(new List<string>() { "NotKeySetTokenValue" })
+            : base(new List<string>() { nameof(NotKeySetTokenValue)})
             { }
             public KeySetTokenValue<int> NotKeySetTokenValue { get; set; }
 
@@ -218,8 +242,8 @@ namespace KeySetPaginator.Tests
         [Test]
         public void TestBadDefinedToken_NotExistingField_ShouldThrow()
         {
-            WrongNameToken token = new();
-            var ex = Assert.Throws<ArgumentException>(() => Rows.AddSorting(token, SortDirectionDTO.desc));
+            WrongNameToken token = new WrongNameToken();
+            var ex = Assert.Throws<ArgumentException>(() => Rows.AddSorting(token, SortDirection.desc));
             Assert.That(ex.Message, Is.EqualTo($"There is no such field NotKeySetTokenValue"));
 
             // Sorting covers the validation here
@@ -229,18 +253,18 @@ namespace KeySetPaginator.Tests
         [Test]
         public void TestBadDefinedToken_NotExistingFieldInit_ShouldThrow()
         {
-            WrongNameToken token = new() { NotKeySetTokenValue = new(1) };
-            var ex = Assert.Throws<ArgumentException>(() => Rows.AddSorting(token, SortDirectionDTO.desc));
+            WrongNameToken token = new WrongNameToken() { NotKeySetTokenValue = KeySetToken.InitField(1) };
+            var ex = Assert.Throws<ArgumentException>(() => Rows.AddSorting(token, SortDirection.desc));
             Assert.That(ex.Message, Is.EqualTo($"There is no such field NotKeySetTokenValue"));
 
-            Assert.Throws<ArgumentException>(() => Rows.KeySetSkip(token, SortDirectionDTO.desc));
+            Assert.Throws<ArgumentException>(() => Rows.KeySetSkip(token, SortDirection.desc));
             Assert.That(ex.Message, Is.EqualTo($"There is no such field NotKeySetTokenValue"));
         }
 
         public class NoTokenValueFieldToken : KeySetToken
         {
             public NoTokenValueFieldToken()
-            : base(new List<string>() { "NotKeySetTokenValue" })
+            : base(new List<string>() { nameof(NotKeySetTokenValue) })
             { }
             public int NotKeySetTokenValue { get; set; }
 

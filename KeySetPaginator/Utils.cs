@@ -1,4 +1,7 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace KeySetPaginator
@@ -20,9 +23,15 @@ namespace KeySetPaginator
             return s1.CompareTo(s2) == 0;
         }
 
+        public static bool NotEqual(string s1, string s2)
+        {
+            return s1.CompareTo(s2) != 0;
+        }
+
         public static readonly MethodInfo StringGreaterThanMethod = typeof(Utils).GetMethod("GreaterThan", new[] { typeof(string), typeof(string) });
         public static readonly MethodInfo StringSmallerThanMethod = typeof(Utils).GetMethod("SmallerThan", new[] { typeof(string), typeof(string) });
         public static readonly MethodInfo StringEqualThanMethod = typeof(Utils).GetMethod("Equal", new[] { typeof(string), typeof(string) });
+        public static readonly MethodInfo StringNotEqualThanMethod = typeof(Utils).GetMethod("NotEqual", new[] { typeof(string), typeof(string) });
 
         public static bool IsNullableType(Type t) => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>);
 

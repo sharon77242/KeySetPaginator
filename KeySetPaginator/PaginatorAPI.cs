@@ -1,4 +1,8 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace KeySetPaginator
 {
@@ -14,7 +18,7 @@ namespace KeySetPaginator
         /// <param name="firstToken"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public static KeySetTokenType? LastReponseToToken<RowType, KeySetTokenType>(this KeySetTokenType firstToken, RowType lastRow)
+        public static KeySetTokenType LastReponseToToken<RowType, KeySetTokenType>(this KeySetTokenType firstToken, RowType lastRow)
             where KeySetTokenType : KeySetToken
         {
             if (firstToken == null)
@@ -71,10 +75,10 @@ namespace KeySetPaginator
         /// <param name="request"></param>
         /// <param name="keySetPagingRequest"></param>
         public static async Task<List<ReturnType>> GetAllResults<RequestType, KeySetTokenType, ReturnType>(
-            this Func<RequestType, KeySetPagingRequest<KeySetTokenType>, Task<List<ReturnType>>> searchAction,
-            RequestType request,
-            KeySetPagingRequest<KeySetTokenType> keySetPagingRequest)
+            Func<KeySetPagingRequest<KeySetTokenType, RequestType>, Task<List<ReturnType>>> searchAction,
+            KeySetPagingRequest<KeySetTokenType, RequestType> keySetPagingRequest)
                 where KeySetTokenType : KeySetToken, new()
+                where RequestType : class, new()
         {
             var firstToken = keySetPagingRequest.KeySetToken;
 
@@ -83,7 +87,7 @@ namespace KeySetPaginator
 
             do
             {
-                response = await searchAction(request, keySetPagingRequest);
+                response = await searchAction(keySetPagingRequest);
                 keySetPagingRequest.KeySetToken = firstToken.LastReponseToToken(response.LastOrDefault());
 
                 result.AddRange(response);
@@ -106,11 +110,11 @@ namespace KeySetPaginator
         /// <param name="request"></param>
         /// <param name="keySetPagingRequest"></param>
         public static async Task<List<ReturnType>> GetAllResults<RequestType, KeySetTokenType, ReturnType>(
-            Func<RequestType, KeySetPagingRequest<KeySetTokenType>, Task<List<ReturnType>>> searchAction,
+            Func<KeySetPagingRequest<KeySetTokenType, RequestType>, Task<List<ReturnType>>> searchAction,
             Func<List<ReturnType>, Task> AfterSearchAction,
-            RequestType request,
-            KeySetPagingRequest<KeySetTokenType> keySetPagingRequest)
+            KeySetPagingRequest<KeySetTokenType, RequestType> keySetPagingRequest)
                 where KeySetTokenType : KeySetToken, new()
+                where RequestType : class, new()
         {
             var firstToken = keySetPagingRequest.KeySetToken;
 
@@ -119,7 +123,7 @@ namespace KeySetPaginator
 
             do
             {
-                response = await searchAction(request, keySetPagingRequest);
+                response = await searchAction(keySetPagingRequest);
                 if (response.Count != 0)
                     await AfterSearchAction(response);
 
@@ -146,11 +150,11 @@ namespace KeySetPaginator
         /// <param name="request"></param>
         /// <param name="keySetPagingRequest"></param>
         public static async Task<List<ReturnType>> GetAllResults<RequestType, KeySetTokenType, ReturnType>(
-            Func<RequestType, KeySetPagingRequest<KeySetTokenType>, Task<List<ReturnType>>> searchAction,
+            Func<KeySetPagingRequest<KeySetTokenType, RequestType>, Task<List<ReturnType>>> searchAction,
             Func<List<ReturnType>, Task<bool>> AfterSearchAction,
-            RequestType request,
-            KeySetPagingRequest<KeySetTokenType> keySetPagingRequest)
+            KeySetPagingRequest<KeySetTokenType, RequestType> keySetPagingRequest)
                 where KeySetTokenType : KeySetToken, new()
+                where RequestType : class, new()
         {
             var firstToken = keySetPagingRequest.KeySetToken;
 
@@ -160,7 +164,7 @@ namespace KeySetPaginator
 
             do
             {
-                response = await searchAction(request, keySetPagingRequest);
+                response = await searchAction(keySetPagingRequest);
                 if (response.Count != 0)
                     afterSearchResponse = await AfterSearchAction(response);
                 

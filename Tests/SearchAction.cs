@@ -1,4 +1,9 @@
-﻿namespace KeySetPaginator.Tests
+﻿using KeySetPaginator.Queryable;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace KeySetPaginator.Tests
 {
     public class SearchAction
     {
@@ -26,22 +31,22 @@
         public virtual Task<bool> AfterSearchBool(List<ExampleModel> a) => Task.FromResult(true);
 
 
-        public Task<List<ExampleModel>> SearchActionExample(ExampleRequest request, KeySetPagingRequest<ExampleToken> pagingRequest)
+        public Task<List<ExampleModel>> SearchActionExample(KeySetPagingRequest<ExampleToken, ExampleRequest> pagingRequest)
         {
             IQueryable<ExampleModel> Query = Rows;
 
-            if (request.NullableName != null)
-                Query = Query.Where(x => x.NullableName == request.NullableName);
-            if (request.IntName != null)
-                Query = Query.Where(x => x.IntName == request.IntName);
-            if (request.LongName != null)
-                Query = Query.Where(x => x.LongName == request.LongName);
-            if (request.StringName != null)
-                Query = Query.Where(x => x.StringName == request.StringName);
-            if (request.DecimalName != null)
-                Query = Query.Where(x => x.DecimalName == request.DecimalName);
-            if (request.LongName != null)
-                Query = Query.Where(x => x.LongName == request.LongName);
+            if (pagingRequest.Request.NullableName != null)
+                Query = Query.Where(x => x.NullableName == pagingRequest.Request.NullableName);
+            if (pagingRequest.Request.IntName != null)
+                Query = Query.Where(x => x.IntName == pagingRequest.Request.IntName);
+            if (pagingRequest.Request.LongName != null)
+                Query = Query.Where(x => x.LongName == pagingRequest.Request.LongName);
+            if (pagingRequest.Request.StringName != null)
+                Query = Query.Where(x => x.StringName == pagingRequest.Request.StringName);
+            if (pagingRequest.Request.DecimalName != null)
+                Query = Query.Where(x => x.DecimalName == pagingRequest.Request.DecimalName);
+            if (pagingRequest.Request.LongName != null)
+                Query = Query.Where(x => x.LongName == pagingRequest.Request.LongName);
 
             Query = Query.AddSorting(pagingRequest.KeySetToken, pagingRequest.SortDirection);
             Query = Query.KeySetSkip(pagingRequest.KeySetToken, pagingRequest.SortDirection);

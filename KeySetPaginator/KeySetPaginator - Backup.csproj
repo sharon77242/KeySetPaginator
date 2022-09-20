@@ -15,7 +15,7 @@
     <PackAsTool>False</PackAsTool>
     <IncludeSymbols>False</IncludeSymbols>
     <PackageLicenseFile>License.txt</PackageLicenseFile>
-    <Version>$(VersionPrefix) 3.2.4</Version>
+    <Version>$(VersionPrefix) 3.1.9</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,7 +27,7 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <None Include="..\189951522-0bd23515-468d-4ccc-9fa5-3bcb2475c542.png">
+    <None Include="..\..\..\..\Desktop\189951522-0bd23515-468d-4ccc-9fa5-3bcb2475c542.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

@@ -1,4 +1,7 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace KeySetPaginator.Queryable
@@ -22,7 +25,7 @@ namespace KeySetPaginator.Queryable
         public static IQueryable<QueryType> KeySetSkip<QueryType, KeySetTokenType>(
         this IQueryable<QueryType> query,
         KeySetTokenType keySetToken,
-        SortDirectionDTO sortDirection)
+        SortDirection sortDirection)
         where KeySetTokenType : KeySetToken
         {
             if (keySetToken.EmptyToken())
@@ -55,20 +58,30 @@ namespace KeySetPaginator.Queryable
                 // string has customized GreaterThan, SmallerThan, Equal methods above
                 if (typeof(KeySetTokenValue<string>).IsAssignableFrom(keySetProp.PropertyType))
                 {
-                    // SortDirectionDTO.asc ? e0.Property > value : e0.Property < value
-                    BinaryExpression greaterOrSmallerExpressionBinary = sortDirection == SortDirectionDTO.asc ?
-                        Expression.GreaterThan(property, valueExpression, false, Utils.StringGreaterThanMethod) :
-                        Expression.LessThan(property, valueExpression, false, Utils.StringSmallerThanMethod);
-                    var greaterOrSmallerExpression = Expression.Lambda<Func<QueryType, bool>>(greaterOrSmallerExpressionBinary, parameter);
+                    Expression<Func<QueryType, bool>> greaterOrSmallerExpression;
+                    //if value is token null if it does - do a null check instead of greater/smaller
+                    if (valueNull)
+                    {
+                        var nullCheck = Expression.NotEqual(property, Expression.Constant(null, ((PropertyInfo)property.Member).PropertyType), false, Utils.StringNotEqualThanMethod);
+                        greaterOrSmallerExpression = Expression.Lambda<Func<QueryType, bool>>(nullCheck, parameter);
+                    }
+                    else
+                    {
+                        // SortDirectionDTO.asc ? e0.Property > value : e0.Property < value
+                        BinaryExpression greaterOrSmallerExpressionBinary = sortDirection == SortDirection.asc ?
+                            Expression.GreaterThan(property, valueExpression, false, Utils.StringGreaterThanMethod) :
+                            Expression.LessThan(property, valueExpression, false, Utils.StringSmallerThanMethod);
+                        greaterOrSmallerExpression = Expression.Lambda<Func<QueryType, bool>>(greaterOrSmallerExpressionBinary, parameter);
+
+                        equalExpression =
+                            Expression.Equal(property, valueExpression, false, Utils.StringEqualThanMethod);
+                    }
 
                     var currentExpression = Expression.OrElse(expressions.Body,
                                 Expression.AndAlso(previousEqualExpression.Body, greaterOrSmallerExpression.Body));
 
                     // old params expression (if exists, first param will have non) || (previousParam equal to token (true if first param ) && currentParam is greater/smaller depends on sortDirection)
                     expressions = Expression.Lambda<Func<QueryType, bool>>(currentExpression, parameter);
-
-                    equalExpression =
-                        Expression.Equal(property, valueExpression, false, Utils.StringEqualThanMethod);
                 }
                 else
                 {
@@ -80,7 +93,7 @@ namespace KeySetPaginator.Queryable
                     else
                     {
                         // SortDirectionDTO.asc ? a.Property > value : a.Property < value
-                        greaterOrSmallerExpressionBinary = sortDirection == SortDirectionDTO.asc ?
+                        greaterOrSmallerExpressionBinary = sortDirection == SortDirection.asc ?
                             Expression.GreaterThan(property, valueExpression) :
                             Expression.LessThan(property, valueExpression);
 
@@ -111,7 +124,7 @@ namespace KeySetPaginator.Queryable
         }
 
         private static void NullableSkip<QueryType>(
-            SortDirectionDTO sortDirection,
+            SortDirection sortDirection,
             Expression<Func<QueryType, bool>> previousEqualExpression,
             ref Expression<Func<QueryType, bool>> expressions,
             ParameterExpression parameter,
@@ -138,13 +151,13 @@ namespace KeySetPaginator.Queryable
             else
             {
                 greaterOrSmallerExpressionBinary = Expression.AndAlso(nullCheck,
-                    sortDirection == SortDirectionDTO.asc ?
+                    sortDirection == SortDirection.asc ?
                         Expression.GreaterThan(property, valueExpression) :
                         Expression.LessThan(property, valueExpression));
 
                 greaterOrSmallerExpression = Expression.Lambda<Func<QueryType, bool>>(greaterOrSmallerExpressionBinary, parameter);
 
-                equalExpression = Expression.Equal(property, valueExpression);
+                equalExpression = Expression.AndAlso(nullCheck, Expression.Equal(property, valueExpression));
             }
 
             var currentExpression = Expression.OrElse(expressions.Body,
@@ -180,7 +193,7 @@ namespace KeySetPaginator.Queryable
         /// <param name="keySetToken">Token to sort by, it must inherit from KeySetToken, and each field in it should be KeySetTokenValue</param>
         /// <param name="sortDirection">direction to sort (asc, desc)</param>
         /// <returns></returns>
-        public static IQueryable<QueryType> AddSorting<QueryType, KeySetTokenType>(this IQueryable<QueryType> query, KeySetTokenType keySetToken, SortDirectionDTO sortDirection)
+        public static IQueryable<QueryType> AddSorting<QueryType, KeySetTokenType>(this IQueryable<QueryType> query, KeySetTokenType keySetToken, SortDirection sortDirection)
             where KeySetTokenType : KeySetToken
         {
             return query.AddSorting(keySetToken, sortDirection.ToString());
@@ -195,7 +208,7 @@ namespace KeySetPaginator.Queryable
         /// <param name="sortingFields">sorting fileds (in order)</param>
         /// <returns></returns>
         /// <exception cref="ArgumentException">No Such field to sort by</exception>
-        public static IQueryable<QueryType> AddSorting<QueryType>(this IQueryable<QueryType> query, SortDirectionDTO sortDirection, List<string> sortingFields)
+        public static IQueryable<QueryType> AddSorting<QueryType>(this IQueryable<QueryType> query, SortDirection sortDirection, List<string> sortingFields)
         {
             return query.AddSorting(sortDirection.ToString(), sortingFields);
         }
@@ -227,11 +240,11 @@ namespace KeySetPaginator.Queryable
                 var fieldGetter = Utils.FieldGetterFromProperty<QueryType>(type, prop);
 
                 orderedQuery = firstTime ?  // for first time use regular order by
-                                    sortDirection == SortDirectionDTO.asc.ToString() ?
+                                    sortDirection == SortDirection.asc.ToString() ?
                                         query.OrderBy(fieldGetter) :
                                         query.OrderByDescending(fieldGetter)
                                         : // after first time use then by
-                                    sortDirection == SortDirectionDTO.asc.ToString() ?
+                                    sortDirection == SortDirection.asc.ToString() ?
                                         orderedQuery.ThenBy(fieldGetter) :
                                         orderedQuery.ThenByDescending(fieldGetter);
                 firstTime = false;
