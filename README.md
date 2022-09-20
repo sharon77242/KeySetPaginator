@@ -32,7 +32,7 @@ KeySetPaginator.PaginatorAPI
 -----------------------------
 await PaginatorAPI.GetAllResults(
                 SearchActionExample,
-                new KeySetPagingRequest<ExampleToken>
+                new KeySetPagingRequest<ExampleToken, ExampleRequest>
                 {
                     PageSize = 3,
                     SortDirection = SortDirection.asc,
@@ -52,7 +52,7 @@ KeySetPaginator.PaginatorAPI
 await PaginatorAPI.GetAllResults(
                 SearchActionExample,
                 AfterSearchFalse,
-                new KeySetPagingRequest<ExampleToken>
+                new KeySetPagingRequest<ExampleToken, ExampleRequest>
                 {
                     PageSize = 1,
                     SortDirection = SortDirection.asc,
