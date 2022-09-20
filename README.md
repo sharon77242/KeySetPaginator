@@ -13,7 +13,7 @@ The extension method allows to easily **skip**, **order by**, and **get all resu
 ## Usage
 
 To use the library at package reference:
-    <PackageReference Include="KeySetPaginator" Version="DesiredVersion" />
+    ```<PackageReference Include="KeySetPaginator" Version="DesiredVersion" />```
 
 
 On your search action use: 
