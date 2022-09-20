@@ -32,12 +32,12 @@ KeySetPaginator.PaginatorAPI
 -----------------------------
 await PaginatorAPI.GetAllResults(
                 SearchActionExample,
-                new ExampleRequest(),
                 new KeySetPagingRequest<ExampleToken>
                 {
                     PageSize = 3,
                     SortDirection = SortDirection.asc,
-                    KeySetToken = new ExampleToken() { StringName = KeySetToken.InitField("sharon2"), NullableName = KeySetToken.InitField(2M) }
+                    KeySetToken = new ExampleToken() { StringName = KeySetToken.InitField("sharon2"), NullableName = KeySetToken.InitField(2M) },
+                    Request = new ExampleRequest()
                 });
 ```
 This will get all the results in a loop, in the loop it will call SearchActionExample, 
@@ -52,12 +52,12 @@ KeySetPaginator.PaginatorAPI
 await PaginatorAPI.GetAllResults(
                 SearchActionExample,
                 AfterSearchFalse,
-                new ExampleRequest(),
                 new KeySetPagingRequest<ExampleToken>
                 {
                     PageSize = 1,
                     SortDirection = SortDirection.asc,
-                    KeySetToken = new ExampleToken() { StringName = KeySetToken.InitField("sharon2"), NullableName = KeySetToken.InitField(3M) }
+                    KeySetToken = new ExampleToken() { StringName = KeySetToken.InitField("sharon2"), NullableName = KeySetToken.InitField(3M) },
+                    Request = new ExampleRequest()
                 });
 ```
 Here we have AfterSearchFalse that will return false after the first search action.
