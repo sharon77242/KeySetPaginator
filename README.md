@@ -7,7 +7,7 @@ for more info on pagination and keyset pagination (Also known as cursor paginati
 
 
 Learn about why the standard offset based pagination (`Take().Skip()`) is bad [here](http://use-the-index-luke.com/no-offset).
-
+Benchmark between the types [here](https://khalidabuhakmeh.com/cursor-paging-with-entity-framework-core-and-aspnet-core). 
 The extension method allows to easily **skip**, **order by**, and **get all results** (while using key set pagination).
 
 ## Usage
